@@ -1725,6 +1725,19 @@ export declare interface TunedModelInfo {
   updateTime?: string;
 }
 
+/** Describes the machine learning model version checkpoint. */
+export declare interface Checkpoint {
+  /** The ID of the checkpoint.
+   */
+  checkpointId?: string;
+  /** The epoch of the checkpoint.
+   */
+  epoch?: string;
+  /** The step of the checkpoint.
+   */
+  step?: string;
+}
+
 /** A trained machine learning model. */
 export declare interface Model {
   /** Resource name of the model. */
@@ -1751,6 +1764,11 @@ export declare interface Model {
   outputTokenLimit?: number;
   /** List of actions that are supported by the model. */
   supportedActions?: string[];
+  /** The default checkpoint id of a model version.
+   */
+  defaultCheckpointId?: string;
+  /** The checkpoints of the model. */
+  checkpoints?: Checkpoint[];
 }
 
 export declare interface ListModelsConfig {
@@ -1792,6 +1810,7 @@ export declare interface UpdateModelConfig {
   abortSignal?: AbortSignal;
   displayName?: string;
   description?: string;
+  defaultCheckpointId?: string;
 }
 
 /** Configuration for updating a tuned model. */
@@ -2051,11 +2070,32 @@ export declare interface GetTuningJobParameters {
   config?: GetTuningJobConfig;
 }
 
+/** TunedModelCheckpoint for the Tuned Model of a Tuning Job. */
+export declare interface TunedModelCheckpoint {
+  /** The ID of the checkpoint.
+   */
+  checkpointId?: string;
+  /** The epoch of the checkpoint.
+   */
+  epoch?: string;
+  /** The step of the checkpoint.
+   */
+  step?: string;
+  /** The Endpoint resource name that the checkpoint is deployed to.
+      Format: `projects/{project}/locations/{location}/endpoints/{endpoint}`.
+       */
+  endpoint?: string;
+}
+
 export declare interface TunedModel {
   /** Output only. The resource name of the TunedModel. Format: `projects/{project}/locations/{location}/models/{model}`. */
   model?: string;
   /** Output only. A resource name of an Endpoint. Format: `projects/{project}/locations/{location}/endpoints/{endpoint}`. */
   endpoint?: string;
+  /** The checkpoints associated with this TunedModel.
+      This field is only populated for tuning jobs that enable intermediate
+      checkpoints. */
+  checkpoints?: TunedModelCheckpoint[];
 }
 
 /** The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors). */
@@ -2086,6 +2126,8 @@ export declare interface SupervisedTuningSpec {
   trainingDatasetUri?: string;
   /** Optional. Cloud Storage path to file containing validation dataset for tuning. The dataset must be formatted as a JSONL file. */
   validationDatasetUri?: string;
+  /** Optional. If set to true, disable intermediate checkpoints for SFT and only the last checkpoint will be exported. */
+  exportLastCheckpointOnly?: boolean;
 }
 
 /** Dataset bucket used to create a histogram for the distribution given a population of values. */
@@ -2366,6 +2408,8 @@ export declare interface CreateTuningJobConfig {
   epochCount?: number;
   /** Multiplier for adjusting the default learning rate. */
   learningRateMultiplier?: number;
+  /** If set to true, disable intermediate checkpoints for SFT and only the last checkpoint will be exported. Otherwise, enable intermediate checkpoints for SFT. */
+  exportLastCheckpointOnly?: boolean;
   /** Adapter size for tuning. */
   adapterSize?: AdapterSize;
   /** The batch size hyperparameter for tuning. If not set, a default of 4 or 16 will be used based on the number of training examples. */

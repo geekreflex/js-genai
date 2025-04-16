@@ -150,6 +150,13 @@ export class Chats {
 }
 
 // @public
+export interface Checkpoint {
+    checkpointId?: string;
+    epoch?: string;
+    step?: string;
+}
+
+// @public
 export interface Citation {
     endIndex?: number;
     license?: string;
@@ -340,6 +347,7 @@ export interface CreateTuningJobConfig {
     batchSize?: number;
     description?: string;
     epochCount?: number;
+    exportLastCheckpointOnly?: boolean;
     httpOptions?: HttpOptions;
     learningRate?: number;
     learningRateMultiplier?: number;
@@ -1555,6 +1563,8 @@ export enum Mode {
 
 // @public
 export interface Model {
+    checkpoints?: Checkpoint[];
+    defaultCheckpointId?: string;
     description?: string;
     displayName?: string;
     endpoints?: Endpoint[];
@@ -2014,6 +2024,7 @@ export interface SupervisedTuningDataStats {
 
 // @public
 export interface SupervisedTuningSpec {
+    exportLastCheckpointOnly?: boolean;
     hyperParameters?: SupervisedHyperParameters;
     trainingDatasetUri?: string;
     validationDatasetUri?: string;
@@ -2096,8 +2107,17 @@ export interface Transcription {
 
 // @public (undocumented)
 export interface TunedModel {
+    checkpoints?: TunedModelCheckpoint[];
     endpoint?: string;
     model?: string;
+}
+
+// @public
+export interface TunedModelCheckpoint {
+    checkpointId?: string;
+    endpoint?: string;
+    epoch?: string;
+    step?: string;
 }
 
 // @public
@@ -2198,6 +2218,8 @@ export interface UpdateCachedContentParameters {
 // @public
 export interface UpdateModelConfig {
     abortSignal?: AbortSignal;
+    // (undocumented)
+    defaultCheckpointId?: string;
     // (undocumented)
     description?: string;
     // (undocumented)
