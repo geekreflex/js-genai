@@ -1597,6 +1597,43 @@ export class GenerateImagesResponse {
   positivePromptSafetyAttributes?: SafetyAttributes;
 }
 
+/** API config for UpscaleImage with fields not exposed to users.
+
+  These fields require default values sent to the API which are not intended
+  to be modifiable or exposed to users in the SDK method.
+   */
+export declare interface UpscaleImageAPIConfigInternal {
+  /** Used to override HTTP request options. */
+  httpOptions?: HttpOptions;
+  /** Whether to include a reason for filtered-out images in the
+      response. */
+  includeRaiReason?: boolean;
+  /** The image format that the output should be saved as. */
+  outputMimeType?: string;
+  /** The level of compression if the ``output_mime_type`` is
+      ``image/jpeg``. */
+  outputCompressionQuality?: number;
+  numberOfImages?: number;
+  mode?: string;
+}
+
+/** API parameters for UpscaleImage. */
+export declare interface UpscaleImageAPIParameters {
+  /** The model to use. */
+  model: string;
+  /** The input image to upscale. */
+  image: Image;
+  /** The factor to upscale the image (x2 or x4). */
+  upscaleFactor: string;
+  /** Configuration for upscaling. */
+  config?: UpscaleImageAPIConfigInternal;
+}
+
+export class UpscaleImageResponse {
+  /** Generated images. */
+  generatedImages?: GeneratedImage[];
+}
+
 /** Optional parameters for models.get method. */
 export declare interface GetModelConfig {
   /** Used to override HTTP request options. */

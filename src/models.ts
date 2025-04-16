@@ -111,9 +111,7 @@ export class Models extends BaseModule {
   /**
    * Generates an image based on a text description and configuration.
    *
-   * @param model - The model to use.
-   * @param prompt - A text description of the image to generate.
-   * @param [config] - The config for image generation.
+   * @param params - The parameters for generating images.
    * @return The response from the API.
    *
    * @example
@@ -163,6 +161,49 @@ export class Models extends BaseModule {
       }
       return response;
     });
+  };
+
+  /**
+   * Upscales an image based on an image, upscale factor, and configuration.
+   * Only supported in Vertex AI currently.
+   *
+   * @param params - The parameters for upscaling an image.
+   * @return The response from the API.
+   *
+   * @example
+   * ```ts
+   * const response = await client.models.upscaleImage({
+   *  model: 'imagen-3.0-generate-002',
+   *  image: image,
+   *  upscaleFactor: 'x2',
+   *  config: {
+   *    includeRaiReason: true,
+   *  },
+   * });
+   * console.log(response?.generatedImages?.[0]?.image?.imageBytes);
+   * ```
+   */
+  upscaleImage = async (
+    params: types.UpscaleImageParameters,
+  ): Promise<types.UpscaleImageResponse> => {
+    const apiConfig: types.UpscaleImageAPIConfigInternal = {
+      numberOfImages: 1,
+      mode: 'upscale',
+    };
+    if (params.config) {
+      apiConfig.outputMimeType = params.config?.outputMimeType;
+      apiConfig.outputCompressionQuality =
+        params.config?.outputCompressionQuality;
+      apiConfig.includeRaiReason = params.config?.includeRaiReason;
+    }
+
+    const apiParams: types.UpscaleImageAPIParameters = {
+      model: params.model,
+      image: params.image,
+      upscaleFactor: params.upscaleFactor,
+      config: apiConfig,
+    };
+    return await this.upscaleImageInternal(apiParams);
   };
 
   private async generateContentInternal(
@@ -520,6 +561,52 @@ export class Models extends BaseModule {
         Object.assign(typedResp, resp);
         return typedResp;
       });
+    }
+  }
+
+  private async upscaleImageInternal(
+    params: types.UpscaleImageAPIParameters,
+  ): Promise<types.UpscaleImageResponse> {
+    let response: Promise<types.UpscaleImageResponse>;
+    let path: string = '';
+    let queryParams: Record<string, string> = {};
+    if (this.apiClient.isVertexAI()) {
+      const body = converters.upscaleImageAPIParametersToVertex(
+        this.apiClient,
+        params,
+      );
+      path = common.formatMap(
+        '{model}:predict',
+        body['_url'] as Record<string, unknown>,
+      );
+      queryParams = body['_query'] as Record<string, string>;
+      delete body['config'];
+      delete body['_url'];
+      delete body['_query'];
+
+      response = this.apiClient
+        .request({
+          path: path,
+          queryParams: queryParams,
+          body: JSON.stringify(body),
+          httpMethod: 'POST',
+          httpOptions: params.config?.httpOptions,
+        })
+        .then((httpResponse) => {
+          return httpResponse.json();
+        }) as Promise<types.UpscaleImageResponse>;
+
+      return response.then((apiResponse) => {
+        const resp = converters.upscaleImageResponseFromVertex(
+          this.apiClient,
+          apiResponse,
+        );
+        const typedResp = new types.UpscaleImageResponse();
+        Object.assign(typedResp, resp);
+        return typedResp;
+      });
+    } else {
+      throw new Error('This method is only supported by the Vertex AI.');
     }
   }
 

@@ -1332,6 +1332,7 @@ export class Models extends BaseModule {
     generateImages: (params: types.GenerateImagesParameters) => Promise<types.GenerateImagesResponse>;
     generateVideos(params: types.GenerateVideosParameters): Promise<types.GenerateVideosOperation>;
     get(params: types.GetModelParameters): Promise<types.Model>;
+    upscaleImage: (params: types.UpscaleImageParameters) => Promise<types.UpscaleImageResponse>;
 }
 
 // @public
@@ -1841,6 +1842,26 @@ export interface UploadFileParameters {
 }
 
 // @public
+export interface UpscaleImageAPIConfigInternal {
+    httpOptions?: HttpOptions;
+    includeRaiReason?: boolean;
+    // (undocumented)
+    mode?: string;
+    // (undocumented)
+    numberOfImages?: number;
+    outputCompressionQuality?: number;
+    outputMimeType?: string;
+}
+
+// @public
+export interface UpscaleImageAPIParameters {
+    config?: UpscaleImageAPIConfigInternal;
+    image: Image_2;
+    model: string;
+    upscaleFactor: string;
+}
+
+// @public
 export interface UpscaleImageConfig {
     httpOptions?: HttpOptions;
     includeRaiReason?: boolean;
@@ -1854,6 +1875,11 @@ export interface UpscaleImageParameters {
     image: Image_2;
     model: string;
     upscaleFactor: string;
+}
+
+// @public (undocumented)
+export class UpscaleImageResponse {
+    generatedImages?: GeneratedImage[];
 }
 
 // @public
